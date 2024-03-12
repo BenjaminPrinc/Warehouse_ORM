@@ -8,6 +8,10 @@
   - [Work GKü](#work-gkü)
     - [Following the tutorial](#following-the-tutorial)
     - [Solving error](#solving-error)
+  - [Work GKv](#work-gkv)
+    - [New entities](#new-entities)
+    - [Problem, endless relations](#problem-endless-relations)
+    - [Mapping methods](#mapping-methods)
   - [Sources](#sources)
 
 
@@ -34,6 +38,39 @@ Hibernate: create table users (id integer not null, email varchar(255), name var
 
 Hibernate: create sequence users_seq start with 1 increment by 50
 ```
+
+## Work GKv
+The warehouse application should be implemented in this project.
+
+### New entities
+One entity is needed for the warehouse and one for the products. From the warehouse perspective, we have a One-To-Many relation, which means one warehouse can hold many products. Additionaly the cascade parameter automates operations if a connected entity experiences changes.
+From the products perspective, a Many-To-One relation, describes that many products can be in one warehouse.
+
+````java
+@OneToMany(mappedBy = "warehouse", cascade = CascadeType.ALL)
+    private List<Products> products;
+````
+
+````java
+@ManyToOne
+    @JoinColumn(name="warehouse_id")
+    private Warehouse warehouse;
+````
+
+### Problem, endless relations
+With the relation between these two entities, a endless loop got created when calling the `/all`. To fix this, i simply deleted the `getWarehouse()` method in the product entity.
+
+### Mapping methods
+```java
+addNewWarehouse (@RequestParam String name, @RequestParam String address, @RequestParam Integer zip, @RequestParam String country, @RequestParam String city){}
+```
+This method makes it possible to create new warehouses via a RequestMapping.
+
+```java
+addNewProduct (@RequestParam String name, @RequestParam String category, @RequestParam Integer quantity, @RequestParam String unit, @RequestParam Integer warehouseId){}
+```
+This method makes it possible to create new product and links them to the warehouse via their id.
+
 
 ## Sources
 [1], *Spring accessing data*, https://spring.io/guides/gs/accessing-data-mysql#scratch
